@@ -3,6 +3,8 @@
 
 使用 [android-hidden-camera](https://github.com/kevalpatel2106/android-hidden-camera) 这个库写的一个简单的 Android 隐藏相机 App。
 
+[下载 APK](https://github.com/sagan/android-hidden-camera/releases) (API Level 25, Android 7.1.1)
+
 ## Usage
 
 1. 打开程序 (显示的名称为 "Magic")。
