@@ -1,15 +1,17 @@
 package me.sagan.magic;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
-import android.support.v4.media.VolumeProviderCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.media.session.*;
+import android.media.*;
 
 import com.androidhiddencamera.CameraConfig;
 import com.androidhiddencamera.HiddenCameraService;
@@ -20,11 +22,12 @@ import com.androidhiddencamera.config.CameraResolution;
 import com.androidhiddencamera.config.CameraRotation;
 
 import java.io.File;
+
 import android.util.Log;
 
 public class MagicService extends HiddenCameraService {
     CameraConfig mCameraConfig;
-    private MediaSessionCompat mediaSession;
+    private MediaSession mediaSession;
     private static final int NOTIFICATION_ID = 1;
 
     private void showForegroundNotification(String contentText) {
@@ -41,7 +44,11 @@ public class MagicService extends HiddenCameraService {
                 showTaskIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Notification notification = new Notification.Builder(getApplicationContext())
+        NotificationChannel channel = new NotificationChannel("magic", "magic", NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+
+        Notification notification = new Notification.Builder(this, "magic")
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_launcher_background)
@@ -50,13 +57,16 @@ public class MagicService extends HiddenCameraService {
                 .build();
         startForeground(NOTIFICATION_ID, notification);
     }
+
     public MagicService() {
 
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d("fuck", "--service created");
+        new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "magic").mkdirs();
 
         mCameraConfig = new CameraConfig()
                 .getBuilder(this)
@@ -67,24 +77,26 @@ public class MagicService extends HiddenCameraService {
                 .build();
         try {
             startCamera(mCameraConfig);
-        } catch(SecurityException e){
+        } catch (SecurityException e) {
             Log.d("fuck", "error " + e);
         }
 
-        mediaSession = new MediaSessionCompat(this, "MagicService");
-        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        mediaSession.setPlaybackState(new PlaybackStateCompat.Builder()
-                .setState(PlaybackStateCompat.STATE_PLAYING, 0, 0) //you simulate a player which plays something.
-                .build());
 
-        //this will only work on Lollipop and up, see https://code.google.com/p/android/issues/detail?id=224134
-        VolumeProviderCompat myVolumeProvider =
-                new VolumeProviderCompat(VolumeProviderCompat.VOLUME_CONTROL_RELATIVE, /*max volume*/100, /*initial volume level*/50) {
+        mediaSession = new MediaSession(this, "MagicService");
+        mediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mediaSession.setPlaybackState(new PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PLAYING, 0, 0) //you simulate a player which plays something.
+                .build());
+        mediaSession.setCallback(new MediaSession.Callback() {
+        });
+
+        VolumeProvider myVolumeProvider =
+                new VolumeProvider(VolumeProvider.VOLUME_CONTROL_RELATIVE, 100, 50) {
                     @Override
                     public void onAdjustVolume(int direction) {
                         //  -1 -- volume down, 1 -- volume up, 0 -- volume button released
                         Log.d("fuck", "volume press " + direction);
-                        if(direction != 0) {
+                        if (direction != 0) {
                             takePicture();
                         }
                     }
@@ -92,8 +104,10 @@ public class MagicService extends HiddenCameraService {
 
         mediaSession.setPlaybackToRemote(myVolumeProvider);
         mediaSession.setActive(true);
+
         showForegroundNotification("Magic Service running");
     }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("fuck", "--service start");
@@ -124,7 +138,7 @@ public class MagicService extends HiddenCameraService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if( mediaSession != null ) {
+        if (mediaSession != null) {
             mediaSession.release();
         }
         stopForeground(true);

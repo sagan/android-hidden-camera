@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
         } else {
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
                 Intent intent = new Intent(this, MagicService.class);
-                startService(intent);
+                startForegroundService(intent);
             } else {
                 //Open settings to grant permission for "Draw other apps".
                 Toast.makeText(this, "Please grant the 'Draw over other apps' privilege to this app.", Toast.LENGTH_LONG).show();
