@@ -1,7 +1,10 @@
 
 # Android Hidden Camera
 
-使用 [android-hidden-camera](https://github.com/kevalpatel2106/android-hidden-camera) 这个库写的一个简单的 Android 隐藏相机 App。
+使用 [android-hidden-camera](https://github.com/kevalpatel2106/android-hidden-camera) 这个库写的一个简单的 Android 隐藏相机 App (Package: me.sagan.magic)
+。
+
+[下载 APK](https://github.com/sagan/android-hidden-camera/releases) (API Level 25, Android 7.1.1)
 
 ## Usage
 
