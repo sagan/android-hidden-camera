@@ -10,8 +10,10 @@
 
 1. 打开程序 (显示的名称为 "Magic")。
 2. 点击 "Toggle Service" 启动服务。第一次启动服务时，会打开手机系统设置里的 "Draw over other app" 管理页面，请在这里授权本程序该权限。服务运行时，会在 notifications 区域显示一个 "Magic service is running" 的通知。
-3. 在任意画面（包括锁屏时）按音量+/-键拍照（使用后置摄像头、最大像素），拍照完成后手机会震动一下。照片会自动保存到外置存储里的 DCIM 相机文件夹里。
+3. 在任意画面（包括锁屏时），按音量+/-键、或触摸屏幕右下角区域(128x128像素范围)拍照（使用后置摄像头、最大像素），拍照完成后手机会震动一下。照片会自动保存到外置存储里的 DCIM/magic 文件夹里。
 4. 再次点击程序里的 "Toggle Service" 停止服务。
+
+注：部分 Android 12 设备可能无法使用音量+/-键拍照，这是一个[系统 bug](https://issuetracker.google.com/issues/201546605)。
 
 ## Permissions
 
