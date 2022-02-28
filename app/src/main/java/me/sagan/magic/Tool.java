@@ -10,8 +10,11 @@ import java.util.*;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.os.VibrationEffect;
 import android.widget.Toast;
 import android.util.Log;
 import android.os.Vibrator;
@@ -35,7 +38,7 @@ public class Tool {
         }
         Log.d("fuck", "Save imageFile to " + dst + " result " + result);
         Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        v.vibrate(300);
+        v.vibrate(VibrationEffect.createOneShot(300, VibrationEffect.DEFAULT_AMPLITUDE));
         return result;
     }
     public static int moveFile(File file, String dst) {

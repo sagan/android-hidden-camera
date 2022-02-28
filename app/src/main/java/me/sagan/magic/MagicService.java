@@ -5,7 +5,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.PixelFormat;
 import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -24,11 +26,18 @@ import com.androidhiddencamera.config.CameraRotation;
 import java.io.File;
 
 import android.util.Log;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
 
 public class MagicService extends HiddenCameraService {
     CameraConfig mCameraConfig;
     private MediaSession mediaSession;
     private static final int NOTIFICATION_ID = 1;
+    public static WindowManager mWindowManager;
+    public static MonitorView mMonitorView;
 
     private void showForegroundNotification(String contentText) {
         // Create intent that will bring our app to the front, as if it was tapped in the app
@@ -77,6 +86,23 @@ public class MagicService extends HiddenCameraService {
                 .build();
         try {
             startCamera(mCameraConfig);
+            if (mWindowManager == null) {
+                mWindowManager = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
+                mMonitorView = new MonitorView(MagicService.this);
+            }
+            WindowManager.LayoutParams params;
+            params = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY ,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT);
+            params.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+            params.width = 128;
+            params.height = 128;
+            params.x = 0;
+            params.y = 0;
+            mWindowManager.addView(mMonitorView, params);
         } catch (SecurityException e) {
             Log.d("fuck", "error " + e);
         }
@@ -141,7 +167,28 @@ public class MagicService extends HiddenCameraService {
         if (mediaSession != null) {
             mediaSession.release();
         }
+        if (mMonitorView != null) {
+            mWindowManager.removeView(mMonitorView);
+            mMonitorView = null;
+            mWindowManager = null;
+        }
         stopForeground(true);
         Log.d("fuck", "--service destroy");
+    }
+
+    public class MonitorView extends View {
+
+        private static final String LOG_TAG = "MonitorView";
+
+        public MonitorView(Context context) {
+            super(context);
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            Log.d("fuck", "touch");
+            takePicture();
+            return super.onTouchEvent(event);
+        }
     }
 }
